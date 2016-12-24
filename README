@@ -1,1 +1,6 @@
-Script de sauvegarde des fichiers de l'utilisateur courant dans un répertoire
+# backup_script
+
+## Setup
+* Set directories to backup in the file backup_include.conf
+* Set directories to exclude from backup in the file backup_exclude.conf
+* Launch ./launch_backup
