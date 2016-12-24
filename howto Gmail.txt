@@ -1,0 +1,16 @@
+*******************************
+How to archive emails with Mail
+*******************************
+
+
+1/ In Mail, right click on the folder you want to archive, then choose "Export Mailbox..."
+
+or
+
+Select the folder and click on menu Mailbox > Export Mailbox...
+
+
+2/ Click on Windows > Activity to monitor the status
+
+
+NB: You can archive several mailboxes at once by selecting them with Cmd Key

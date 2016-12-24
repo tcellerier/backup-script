@@ -1,0 +1,60 @@
+#!/bin/sh
+# Script de sauvegarde des fichiers de l'utilisateur courant dans un répertoire
+# Last update: 04/06/2012
+# V1.0
+#
+# Options de rsync :
+# -a mode archive (=-rlptgoD : recursion, conservation des liens, droits, etc ...)
+# -v mode bavard pour suivre la progression de la commande
+# -h Output numbers in a more human-readable format
+# -r when --files-from is specified, -r is not implied from -a.
+# --stats Affiche des statistiques ˆ la fin de la sauvegarde
+# --delete Supprime les fichiers en trop dans la sauvegarde (=> copie identique de la source)
+# --delete-excluded Files that are excluded from transfer (from the filters) are being deleted (on the backup side)
+
+# --files-from= -> tweaks the default behavior of rsync by specifying the exact list of files to transfer (instead of everything by default)
+# --exclude-from= -> specifies a FILE that contains exclude patterns (one per line). Blank lines in the file and lines starting with ';' or '#' are ignored. 
+# --exclude='.DS_Store' -> exclude any .DS_Store file
+
+#############################################################
+################    PARAMETERS TO SET UP     ################
+#############################################################
+
+# DIRECTORY OF THE BACKUP
+DIRBACKUP='/Volumes/backup_MBP/'
+
+# INCLUDED/EXCLUDED FOLDERS TO SET UP IN:
+# backup_exclude.conf and backup_include.conf
+
+#############################################################
+#############################################################
+
+clear
+printf "\nThis will start a backup for user ## ${USER} ##\nin ${DIRBACKUP}${USER}/ \n\n"
+
+if [ -e ${DIRBACKUP}${USER}/Readme.txt ] ; then
+  cat ${DIRBACKUP}${USER}/Readme.txt
+fi
+
+printf "\n\n\nContinue with Enter or Ctrl-c to quit\n"
+read
+
+clear
+printf "Files to save:\n"
+grep -v '^$' ${DIRBACKUP}backup_include.conf | grep -v '^#'
+
+printf "\nFiles to ignore:\n"
+grep -v '^$' ${DIRBACKUP}backup_exclude.conf | grep -v '^#'
+
+
+printf "\nPress Enter to start"
+read
+
+
+rsync -avhr --stats --delete --delete-excluded --exclude='.DS_Store' --exclude-from=''${DIRBACKUP}'backup_exclude.conf' --files-from=''${DIRBACKUP}'backup_include.conf' ~/ ${DIRBACKUP}${USER}
+
+
+# Save timestamp in a Readme file
+printf "Last backup was on " > ${DIRBACKUP}${USER}/Readme.txt
+date '+%Y-%m-%d at %H:%M' >> ${DIRBACKUP}${USER}/Readme.txt
+
