@@ -1,60 +1,63 @@
 #!/bin/sh
-# Script de sauvegarde des fichiers de l'utilisateur courant dans un r�pertoire
-# Last update: 04/06/2012
-# V1.0
-#
-# Options de rsync :
-# -a mode archive (=-rlptgoD : recursion, conservation des liens, droits, etc ...)
-# -v mode bavard pour suivre la progression de la commande
-# -h Output numbers in a more human-readable format
-# -r when --files-from is specified, -r is not implied from -a.
-# --stats Affiche des statistiques � la fin de la sauvegarde
-# --delete Supprime les fichiers en trop dans la sauvegarde (=> copie identique de la source)
-# --delete-excluded Files that are excluded from transfer (from the filters) are being deleted (on the backup side)
+# Script de sauvegarde des fichiers de l'utilisateur courant dans un autre répertoire
+# Last update: 11/03/2017
+# V1.1
 
-# --files-from= -> tweaks the default behavior of rsync by specifying the exact list of files to transfer (instead of everything by default)
-# --exclude-from= -> specifies a FILE that contains exclude patterns (one per line). Blank lines in the file and lines starting with ';' or '#' are ignored. 
+
+# Options de rsync :
+# -a This is equivalent to -rlptgoD. It is a quick way of saying you want recursion and want to preserve almost everything
+# -v This option increases the amount of information you are given during the transfer
+# -h Output numbers in a more human-readable format
+# -r when "--files-from" is specified, -r is not implied from -a.
+# --stats -> This tells rsync to print a verbose set of statistics on the file transfer
+# --progress -> This option tells rsync to print information showing the progress of the transfer.
+# --delete-during -> Request that the file-deletions on the receiving side be done incrementally as the transfer happens. This is a faster method than choosing the before- or after-transfer algorithm
+# --delete-excluded -> Files that are excluded from transfer (from the filters) are being deleted (on the destination side)
 # --exclude='.DS_Store' -> exclude any .DS_Store file
+# --exclude-from= -> specifies a FILE that contains exclude patterns (one per line). Blank lines in the file and lines starting with ';' or '#' are ignored. 
+# --files-from= -> tweaks the default behavior of rsync by specifying the exact list of files to transfer (instead of everything by default)
+# --log-file -> This option causes rsync to log what it is doing to a file.
+
 
 #############################################################
 ################    PARAMETERS TO SET UP     ################
 #############################################################
 
-# DIRECTORY OF THE BACKUP
+# Dossier de sauvegarde de destination (Ne peut pas être ./ car ne marche pas lorsqu'on exécute le script par double clic)
 DIRBACKUP='/Volumes/backup_MBP/'
 
-# INCLUDED/EXCLUDED FOLDERS TO SET UP IN:
-# backup_exclude.conf and backup_include.conf
+# Les fichiers/dossiers à inclure/exclure sont à configurer dans les 2 fichiers suivants :
+#   backup_exclude.conf & backup_include.conf
 
 #############################################################
 #############################################################
+
 
 clear
 printf "\nThis will start a backup for user ## ${USER} ##\nin ${DIRBACKUP}${USER}/ \n\n"
 
 if [ -e ${DIRBACKUP}${USER}/Readme.txt ] ; then
   cat ${DIRBACKUP}${USER}/Readme.txt
+  printf "\n"
 fi
 
-printf "\n\n\nContinue with Enter or Ctrl-c to quit\n"
+printf "\nContinue with Enter or Ctrl-c to quit\n"
 read
+
 
 clear
 printf "Files to save:\n"
 grep -v '^$' ${DIRBACKUP}backup_include.conf | grep -v '^#'
-
 printf "\nFiles to ignore:\n"
 grep -v '^$' ${DIRBACKUP}backup_exclude.conf | grep -v '^#'
-
 
 printf "\nPress Enter to start"
 read
 
 
-rsync -avhr --stats --delete --delete-excluded --exclude='.DS_Store' --exclude-from=''${DIRBACKUP}'backup_exclude.conf' --files-from=''${DIRBACKUP}'backup_include.conf' ~/ ${DIRBACKUP}${USER}
+rsync -avhr --stats --progress --delete-during --delete-excluded --exclude=".DS_Store" --exclude-from="${DIRBACKUP}backup_exclude.conf" --files-from="${DIRBACKUP}backup_include.conf" --log-file="${DIRBACKUP}${USER}/LastRunLog.txt" ~/ ${DIRBACKUP}${USER}
 
 
 # Save timestamp in a Readme file
 printf "Last backup was on " > ${DIRBACKUP}${USER}/Readme.txt
 date '+%Y-%m-%d at %H:%M' >> ${DIRBACKUP}${USER}/Readme.txt
-
