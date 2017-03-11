@@ -53,6 +53,7 @@ grep -v '^$' ${DIRBACKUP}backup_exclude.conf | grep -v '^#'
 printf "\nPress Enter to start"
 read
 
+echo > "${DIRBACKUP}${USER}/LastRunLog.txt" # On efface les anciens logs
 
 rsync -avhr --stats --delete-during --delete-excluded --exclude=".DS_Store" --exclude-from="${DIRBACKUP}backup_exclude.conf" --files-from="${DIRBACKUP}backup_include.conf" --log-file="${DIRBACKUP}${USER}/LastRunLog.txt" ~/ ${DIRBACKUP}${USER}
 
